@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="JVM学习笔记">
+    <meta name="author" content="Avisen">
+    <link rel="icon" href="../../assets/img/favicon.ico">
+
+    <title>Java线程池</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../../assets/css/blog.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]>
+    <script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<!-- reference head -->
+<script src="../guide/head.js"></script>
+<div class="container">
+    <div class="blog-header">
+        <h1 class="blog-title">并发编程学习笔记</h1>
+        <p class="lead blog-description"></p>
+        <hr>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-8 blog-main">
+            <div class="blog-post">
+                <h2 class="blog-post-title">Java线程池</h2>
+                <p class="blog-post-meta">December 3, 2020 by <a href="https://twitter.com/avisen68060389">@Avisen</a>
+                </p>
+                <br>
+                <h3>线程池概述</h3>
+                <hr>
+                <p>
+                    <code>java.util.concurrent.Executors</code> 提供了一个 <code>java.util.concurrent.Executor</code> 接口的实现用于创建线程池。
+                    多线程技术主要解决处理器单元内多个线程执行的问题，它可以显著减少处理器单元的闲置时间，增加处理器单元的吞吐能力。
+                </p>
+                <br>
+                <h3>实现原理</h3>
+                <hr>
+                <p>
+                    java线程池的实现原理很简单，说白了就是一个线程集合 <code>workerSet</code> 和一个阻塞队列 <code>workQueue</code>。
+                    当用户向线程池提交一个任务(也就是线程)时，线程池会先将任务放入 <code>workQueue</code> 中。
+                    <code>workerSet</code> 中的线程会不断的从 <code>workQueue</code> 中获取线程然后执行。
+                    当 <code>workQueue</code> 中没有任务的时候， <code>worker</code> 就会阻塞，直到队列中有任务了就取出来继续执行。
+                </p>
+                <br>
+                <h3>线程池的作用</h3>
+                <hr>
+                <p>
+                    线程池作用就是限制系统中执行线程的数量。根据系统的环境情况，可以自动或手动设置线程数量，达到运行的最佳效果；少了浪费了系统资源，多了造成系统拥挤效率不高。
+                    用线程池控制线程数量，其他线程排队等候。一个任务执行完毕，再从队列的中取最前面的任务开始执行。若队列中没有等待进程，线程池的这一资源处于等待。
+                    当一个新任务需要运行时，如果线程池中有等待的工作线程，就可以开始运行了；否则进入等待队列。
+                </p>
+                <br>
+                <h3>线程池的优点</h3>
+                <hr>
+                <ul>
+                    <li>
+                        减少了创建和销毁线程的次数，每个工作线程都可以被重复利用，可执行多个任务。
+                    </li>
+                    <li>
+                        提高响应速度。当任务到达时，任务可以不需要的等到线程创建就能立即执行。
+                    </li>
+                    <li>
+                        便于统一管理、分配、调优和监控。
+                    </li>
+                </ul>
+                <div class="blog-callout blog-callout-info">
+                    Java1.5中引入的Executor框架把任务的提交和执行进行解耦，只需要定义好任务，然后提交给线程池，而不用关心该任务是如何执行、被哪个线程执行，以及什么时候执行。
+                </div>
+                <br>
+                <h3>Executor框架接口</h3>
+                <hr>
+                <p>
+                    <code>Executor</code> 框架是一个根据一组执行策略调用，调度，执行和控制的异步任务的框架，目的是提供一种将”任务提交”与”任务如何运行”分离开来的机制。<br>
+                    J.U.C中有三个Executor接口：
+                </p>
+                <ul>
+                    <li>
+                        Executor：一个运行新任务的简单接口；
+                    </li>
+                    <li>
+                        ExecutorService：扩展了Executor接口。添加了一些用来管理执行器生命周期和任务生命周期的方法；
+                    </li>
+                    <li>
+                        ScheduledExecutorService：扩展了ExecutorService。支持Future和定期执行任务。
+                    </li>
+                </ul>
+                <br>
+                <h3>主要参数</h3>
+                <hr>
+                <pre><code>
+                    public ThreadPoolExecutor(int corePoolSize,
+                        int maximumPoolSize,
+                        long keepAliveTime,
+                        TimeUnit unit,
+                        BlockingQueue &lt;Runnable&gt; workQueue,
+                        ThreadFactory threadFactory,
+                        RejectedExecutionHandler handler)
+                </code></pre>
+                <ul>
+                    <li><code>corePoolSize</code> : 核心线程数量，即规定线程池有几个线程(worker)在运行。</li>
+                    <li><code>maximumPoolSize</code>: 最大线程数量。当 <code>workQueue</code> 满了,不能添加任务的时候，这个参数才会生效。规定线程池最多只能有多少个线程(worker)在执行。</li>
+                    <li><code>keepAliveTime</code>: 线程池维护线程所允许的空闲时间。当线程池中的线程数量大于 <code>corePoolSize</code> 的时候，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了keepAliveTime。</li>
+                    <li><code>unit</code> : 生存时间对于的单位</li>
+                    <li>
+                        如果运行的线程少于 <code>corePoolSize</code>，则创建新线程来处理任务，即使线程池中的其他线程是空闲的；
+                    </li>
+                    <li>
+                        如果线程池中的线程数量大于等于 <code>corePoolSize</code> 且小于 <code>maximumPoolSize</code>，则只有当 <code>workQueue</code> 满时才创建新的线程去处理任务；
+                    </li>
+                    <li>
+                        如果设置的 <code>corePoolSize</code> 和 <code>maximumPoolSize</code> 相同，则创建的线程池的大小是固定的，这时如果有新任务提交，若 <code>workQueue</code> 未满，则将请求放入 <code>workQueue</code> 中，
+                        等待有空闲的线程去从 <code>workQueue</code> 中取任务并处理；
+                    </li>
+                    <li>
+                        如果运行的线程数量大于等于 <code>maximumPoolSize</code> ，这时如果 <code>workQueue</code> 已经满了，则通过 <code>handler</code> 所指定的策略来处理任务；
+                        所以，任务提交时，判断的顺序为 <code>corePoolSize –> workQueue –> maximumPoolSize</code> 。
+                    </li>
+                </ul>
+                <br>
+
+
+            </div><!-- /.blog-post -->
+
+            <nav>
+                <ul class="pager">
+                    <li><a href="#">Previous</a></li>
+                    <li><a href="#">Next</a></li>
+                </ul>
+            </nav>
+            <p class="text-center"><a href="#">back to top</a></p>
+
+        </div><!-- /.blog-main -->
+
+
+        <!-- reference sidebar -->
+        <script src="../guide/blogsCatalog.js"></script>
+
+    </div><!-- /.row -->
+
+</div><!-- /.container -->
+</body>
+</html>
