@@ -5,11 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <meta name="description" content="JVM学习笔记">
+    <meta name="description" content="并发编程学习笔记">
     <meta name="author" content="Avisen">
-    <link rel="icon" href="../../favicon.ico">
+    <link rel="icon" href="../../assets/img/favicon.ico">
 
-    <title>并发编程学习笔记</title>
+    <title>Java线程池</title>
 
     <!-- Bootstrap core CSS -->
     <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
@@ -44,81 +44,158 @@
     <div class="row">
         <div class="col-sm-8 blog-main">
             <div class="blog-post">
-                <h2 class="blog-post-title">Title</h2>
-                <p class="blog-post-meta">February 15, 2020 by <a href="https://twitter.com/avisen68060389">@Avisen</a>
+                <h2 class="blog-post-title">Java线程池</h2>
+                <p class="blog-post-meta">December 3, 2020 by <a href="https://twitter.com/avisen68060389">@Avisen</a>
                 </p>
                 <br>
-                <h3>Sub-Title</h3>
+                <h3>线程池概述</h3>
                 <hr>
-                <p>不同的对象引用类型， GC会采用不同的方法进行回收，JVM对象的引用分为了四种类型：</p>
+                <p>
+                    <code>java.util.concurrent.Executors</code> 提供了一个 <code>java.util.concurrent.Executor</code> 接口的实现用于创建线程池。
+                    多线程技术主要解决处理器单元内多个线程执行的问题，它可以显著减少处理器单元的闲置时间，增加处理器单元的吞吐能力。
+                </p>
+                <br>
+                <h3>实现原理</h3>
+                <hr>
+                <p>
+                    java线程池的实现原理很简单，说白了就是一个线程集合 <code>workerSet</code> 和一个阻塞队列 <code>workQueue</code>。
+                    当用户向线程池提交一个任务(也就是线程)时，线程池会先将任务放入 <code>workQueue</code> 中。
+                    <code>workerSet</code> 中的线程会不断的从 <code>workQueue</code> 中获取线程然后执行。
+                    当 <code>workQueue</code> 中没有任务的时候， <code>worker</code> 就会阻塞，直到队列中有任务了就取出来继续执行。
+                </p>
+                <br>
+                <h3>线程池的作用</h3>
+                <hr>
+                <p>
+                    线程池作用就是限制系统中执行线程的数量。根据系统的环境情况，可以自动或手动设置线程数量，达到运行的最佳效果；少了浪费了系统资源，多了造成系统拥挤效率不高。
+                    用线程池控制线程数量，其他线程排队等候。一个任务执行完毕，再从队列的中取最前面的任务开始执行。若队列中没有等待进程，线程池的这一资源处于等待。
+                    当一个新任务需要运行时，如果线程池中有等待的工作线程，就可以开始运行了；否则进入等待队列。
+                </p>
+                <br>
+                <h3>线程池的优点</h3>
+                <hr>
                 <ul>
                     <li>
-                        <strong>强引用</strong>:默认情况下，对象采用的均为强引用，如果一个对象具有强引用，那就类似于必不可少的生活用品，
-                        垃圾回收器绝不会回收它。当内存空 间不足，Java虚拟机宁愿抛出OutOfMemoryError错误，使程序异常终止，
-                        也不会靠随意回收具有强引用的对象来解决内存不足问题。
+                        减少了创建和销毁线程的次数，每个工作线程都可以被重复利用，可执行多个任务。
                     </li>
-                    <br>
                     <li>
-                        <strong>软引用</strong>：如果一个对象只具有软引用，那就类似于可有可物的生活用品。
-                        如果内存空间足够，垃圾回收器就不会回收它，如果内存空间不足了，就会回收这些对象的内存。
-                        只要垃圾回收器没有回收它，该对象就可以被程序使用。软引用可用来实现内存敏感的高速缓存。
-                        <em>软引用可以和一个引用队列（ReferenceQueue）联合使用，如果软引用所引用的对象被垃圾回收，
-                            JAVA虚拟机就会把这个软引用加入到与之关联的引用队列中。</em>
+                        提高响应速度。当任务到达时，任务可以不需要的等到线程创建就能立即执行。
                     </li>
-                    <br>
                     <li>
-                        <strong>弱引用</strong>：弱引用与软引用的区别在于：只具有弱引用的对象拥有更短暂的生命周期。
-                        在垃圾回收器线程扫描它 所管辖的内存区域的过程中，一旦发现了只具有弱引用的对象，不管当前内存空间足够与否，
-                        都会回收它的内存。不过，由于垃圾回收器是一个优先级很低的线程，因此不一定会很快发现那些只具有弱引用的对象。
+                        便于统一管理、分配、调优和监控。
                     </li>
-                    <br>
+                </ul>
+                <div class="blog-callout blog-callout-info">
+                    Java1.5中引入的Executor框架把任务的提交和执行进行解耦，只需要定义好任务，然后提交给线程池，而不用关心该任务是如何执行、被哪个线程执行，以及什么时候执行。
+                </div>
+                <br>
+                <h3>Executor框架接口</h3>
+                <hr>
+                <p>
+                    <code>Executor</code> 框架是一个根据一组执行策略调用，调度，执行和控制的异步任务的框架，目的是提供一种将”任务提交”与”任务如何运行”分离开来的机制。<br>
+                    J.U.C中有三个Executor接口：
+                </p>
+                <ul>
                     <li>
-                        <strong>虚引用</strong>：“虚引用”顾名思义，就是形同虚设，与其他几种引用都不同，虚引用并不会决定对象的生命周期。
-                        如果一个对象仅持有虚引用，那么它就和没有任何引用一样，在任何时候都可能被垃圾回收。
+                        Executor：一个运行新任务的简单接口；
+                    </li>
+                    <li>
+                        ExecutorService：扩展了Executor接口。添加了一些用来管理执行器生命周期和任务生命周期的方法；
+                    </li>
+                    <li>
+                        ScheduledExecutorService：扩展了ExecutorService。支持Future和定期执行任务。
                     </li>
                 </ul>
                 <br>
-                <blockquote>
-                    <strong>说明</strong><br>
-                    <p style="font-size: 14px">
-                        虚引用与软引用和弱引用的一个区别在于： 虚引用必须和引用队列（ReferenceQueue）联合使用。
-                        当垃圾回收器准备回收一个对象时，如果发现它还有虚引用，就会在回收对象的内存之前，把这个虚引用加入到与之关联的引用队列中。
-                        程序可以通过判断引用队列中是否已经加入了虚引用，来了解被引用的对象是否将要被垃圾回收。
-                        程序如果发现某个虚引用已经被加入到引用队列，那么就可以在所引用的对象的内存被回收之前采取必要的行动。
-                        特别注意，在程序设计中一般很少使用弱引用与虚引用，使用软引用的情况较多，这是因为软引用可以加速JVM对垃圾内存的回收速度，
-                        可以维护系统的运行安全，防止内存溢出（OutOfMemory）等问题的产生。
-                    </p>
-                </blockquote>
-                <pre><code></code></pre>
+                <h3>主要参数</h3>
+                <hr>
+                <pre><code>
+                    public ThreadPoolExecutor(int corePoolSize,
+                        int maximumPoolSize,
+                        long keepAliveTime,
+                        TimeUnit unit,
+                        BlockingQueue &lt;Runnable&gt; workQueue,
+                        ThreadFactory threadFactory,
+                        RejectedExecutionHandler handler)
+                </code></pre>
+                <ul>
+                    <li><code>corePoolSize</code> : 核心线程数量，即规定线程池有几个线程(worker)在运行。</li>
+                    <ul>
+                        <br><li>如果运行的线程少于 <code>corePoolSize</code>，则创建新线程来处理任务，即使线程池中的其他线程是空闲的；</li>
+                        <br><li>如果线程池中的线程数量大于等于 <code>corePoolSize</code> 且小于 <code>maximumPoolSize</code>，
+                        则只有当 <code>workQueue</code> 满时才创建新的线程去处理任务；</li>
+                        <br><li>
+                            如果设置的 <code>corePoolSize</code> 和 <code>maximumPoolSize</code> 相同，则创建的线程池的大小是固定的，
+                            这时如果有新任务提交，若 <code>workQueue</code> 未满，则将请求放入 <code>workQueue</code> 中，
+                            等待有空闲的线程去从 <code>workQueue</code> 中取任务并处理；
+                        </li>
+                            <br><li>
+                            如果运行的线程数量大于等于 <code>maximumPoolSize</code> ，这时如果 <code>workQueue</code> 已经满了，
+                            则通过 <code>handler</code> 所指定的策略来处理任务；
+                            所以，任务提交时，判断的顺序为 <code>corePoolSize –> workQueue –> maximumPoolSize</code> 。
+                        </li>
+                    </ul>
+                    <br><li><code>maximumPoolSize</code> : 最大线程数量。当 <code>workQueue</code> 满了,不能添加任务的时候，这个参数才会生效。规定线程池最多只能有多少个线程(worker)在执行。</li>
+                    <br><li><code>keepAliveTime</code> : 线程池维护线程所允许的空闲时间。当线程池中的线程数量大于 <code>corePoolSize</code> 的时候，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了keepAliveTime。</li>
+                    <br><li><code>unit</code> : 生存时间对于的单位</li>
+                    <br><li><code>workQueue</code> : 等待队列，当任务提交时，如果线程池中的线程数量大于等于corePoolSize的时候，把该任务封装成一个Worker对象放入等待队列。主要有以下几种处理方式：
+                        <ul>
+                            <li>直接切换：这种方式常用的队列是 <code>SynchronousQueue</code>；</li>
+                            <li>使用无界队列：一般使用基于链表的阻塞队列LinkedBlockingQueue。如果使用这种方式，那么线程池中能够创建的最大线程数就是 <code>corePoolSize</code> ，
+                            而 <code>maximumPoolSize</code> 就不会起作用了。当线程池中所有的核心线程都是 <code>RUNNING</code> 状态时，这时一个新的任务提交就会放入等待队列中。</li>
+                            <li>使用有界队列：一般使用 <code>ArrayBlockingQueue</code> 。使用该方式可以将线程池的最大线程数量限制为 <code>maximumPoolSize</code> ，
+                            这样能够降低资源的消耗，但同时这种方式也使得线程池对线程的调度变得更困难，因为线程池和队列的容量都是有限的值，所以要想使线程池处理任务的吞吐率达到一个相对合理的范围，
+                            又想使线程调度相对简单，并且还要尽可能的降低线程池对资源的消耗，就需要合理的设置这两个数量。</li>
+                        </ul>
+                    <br><li><code>threadFactory</code>: 它是 <code>ThreadFactory</code> 类型的变量，用来创建新线程。默认使用 <code>Executors.defaultThreadFactory()</code>
+                    来创建线程。使用该方法创建线程时，会使新创建的线程具有相同的 <code>NORM_PRIORITY</code> 优先级并且是非守护线程，同时也设置了线程的名称。</li>
+                    <br>
+                    <li><code>handler</code>: 它是 <code>RejectedExecutionHandler</code> 类型的变量，表示线程池的拒绝策略。如果阻塞队列满了并且没有空闲的线程，
+                    这时如果继续提交任务，就需要采取一种策略处理该任务。线程池提供了4种策略：
+                        <ul>
+                            <br><li><code>AbortPolicy</code>：直接抛出异常，这是默认策略；</li>
+                            <br><li><code>CallerRunsPolicy</code>：用调用者所在的线程来执行任务；</li>
+                            <br><li><code>DiscardOldestPolicy</code>：丢弃阻塞队列中靠最前的任务，并执行当前任务；</li>
+                            <br><li><code>DiscardPolicy</code>：直接丢弃任务；</li>
+                        </ul>
+                    </li>
+
+                </ul>
+                <br>
+
+
             </div><!-- /.blog-post -->
 
             <nav>
                 <ul class="pager">
-                    <li><a href="#">Previous</a></li>
+                    <li><a href="JVMBlog02.html">Previous</a></li>
+                    <li><a href="#">Back to top</a></li>
                     <li><a href="#">Next</a></li>
                 </ul>
             </nav>
-            <p class="text-center"><a href="#">back to top</a></p>
-
         </div><!-- /.blog-main -->
 
-        <!-- reference sidebar -->
-        <script src="../guide/blogsCatalog.js"></script>
+        <!-- sidebar -->
+        <div class="col-sm-4 sidebar">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="JVMBlog02.html">JVM的内存结构</a></li>
+                <li class="nav-item"><a href="JVMBlog02.html">GC垃圾回收</a></li>
+                <li class="nav-item"><a href="#thread-1">线程池</a>
+                    <ul>
+                        <li><a class="btn" href="#thread-1-1">线程池概述</a></li>
+                        <li><a class="btn" href="#thread-1-2">实现原理</a></li>
+                        <li><a class="btn" href="#thread-1-2">线程池的作用</a></li>
+                        <li><a class="btn" href="#thread-1-2">线程池的优点</a></li>
+                        <li><a class="btn" href="#thread-1-2">Executor框架接口</a></li>
+                        <li><a class="btn" href="#thread-1-2">主要参数</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a href="#">并发安全</a></li>
+            </ul>
+        </div><!-- /.sidebar -->
 
     </div><!-- /.row -->
 
 </div><!-- /.container -->
-
-<footer class="blog-footer"></footer>
-
-
-<!-- Bootstrap core JavaScript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-3.3.1.js"><\/script>')</script>
-<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
 </body>
 </html>
