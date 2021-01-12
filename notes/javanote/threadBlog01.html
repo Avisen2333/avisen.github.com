@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="JVM学习笔记">
+    <meta name="author" content="Avisen">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>并发编程学习笔记</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../../assets/css/blog.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]>
+    <script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<!-- reference head -->
+<script src="../guide/head.js"></script>
+<div class="container">
+    <div class="blog-header">
+        <h1 class="blog-title">并发编程学习笔记</h1>
+        <p class="lead blog-description"></p>
+        <hr>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-8 blog-main">
+            <div class="blog-post">
+                <h2 class="blog-post-title">Title</h2>
+                <p class="blog-post-meta">February 15, 2020 by <a href="https://twitter.com/avisen68060389">@Avisen</a>
+                </p>
+                <br>
+                <h3>Sub-Title</h3>
+                <hr>
+                <p>不同的对象引用类型， GC会采用不同的方法进行回收，JVM对象的引用分为了四种类型：</p>
+                <ul>
+                    <li>
+                        <strong>强引用</strong>:默认情况下，对象采用的均为强引用，如果一个对象具有强引用，那就类似于必不可少的生活用品，
+                        垃圾回收器绝不会回收它。当内存空 间不足，Java虚拟机宁愿抛出OutOfMemoryError错误，使程序异常终止，
+                        也不会靠随意回收具有强引用的对象来解决内存不足问题。
+                    </li>
+                    <br>
+                    <li>
+                        <strong>软引用</strong>：如果一个对象只具有软引用，那就类似于可有可物的生活用品。
+                        如果内存空间足够，垃圾回收器就不会回收它，如果内存空间不足了，就会回收这些对象的内存。
+                        只要垃圾回收器没有回收它，该对象就可以被程序使用。软引用可用来实现内存敏感的高速缓存。
+                        <em>软引用可以和一个引用队列（ReferenceQueue）联合使用，如果软引用所引用的对象被垃圾回收，
+                            JAVA虚拟机就会把这个软引用加入到与之关联的引用队列中。</em>
+                    </li>
+                    <br>
+                    <li>
+                        <strong>弱引用</strong>：弱引用与软引用的区别在于：只具有弱引用的对象拥有更短暂的生命周期。
+                        在垃圾回收器线程扫描它 所管辖的内存区域的过程中，一旦发现了只具有弱引用的对象，不管当前内存空间足够与否，
+                        都会回收它的内存。不过，由于垃圾回收器是一个优先级很低的线程，因此不一定会很快发现那些只具有弱引用的对象。
+                    </li>
+                    <br>
+                    <li>
+                        <strong>虚引用</strong>：“虚引用”顾名思义，就是形同虚设，与其他几种引用都不同，虚引用并不会决定对象的生命周期。
+                        如果一个对象仅持有虚引用，那么它就和没有任何引用一样，在任何时候都可能被垃圾回收。
+                    </li>
+                </ul>
+                <br>
+                <blockquote>
+                    <strong>说明</strong><br>
+                    <p style="font-size: 14px">
+                        虚引用与软引用和弱引用的一个区别在于： 虚引用必须和引用队列（ReferenceQueue）联合使用。
+                        当垃圾回收器准备回收一个对象时，如果发现它还有虚引用，就会在回收对象的内存之前，把这个虚引用加入到与之关联的引用队列中。
+                        程序可以通过判断引用队列中是否已经加入了虚引用，来了解被引用的对象是否将要被垃圾回收。
+                        程序如果发现某个虚引用已经被加入到引用队列，那么就可以在所引用的对象的内存被回收之前采取必要的行动。
+                        特别注意，在程序设计中一般很少使用弱引用与虚引用，使用软引用的情况较多，这是因为软引用可以加速JVM对垃圾内存的回收速度，
+                        可以维护系统的运行安全，防止内存溢出（OutOfMemory）等问题的产生。
+                    </p>
+                </blockquote>
+                <pre><code></code></pre>
+            </div><!-- /.blog-post -->
+
+            <nav>
+                <ul class="pager">
+                    <li><a href="#">Previous</a></li>
+                    <li><a href="#">Next</a></li>
+                </ul>
+            </nav>
+            <p class="text-center"><a href="#">back to top</a></p>
+
+        </div><!-- /.blog-main -->
+
+        <!-- reference sidebar -->
+        <script src="../guide/blogsCatalog.js"></script>
+
+    </div><!-- /.row -->
+
+</div><!-- /.container -->
+
+<footer class="blog-footer"></footer>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-3.3.1.js"><\/script>')</script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+</body>
+</html>
