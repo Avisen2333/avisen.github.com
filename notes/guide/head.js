@@ -49,12 +49,10 @@ document.writeln("                        <span class=\'glyphicon glyphicon-book
 document.writeln("                        <b class=\'caret\'></b>");
 document.writeln("                    </a>");
 document.writeln("                    <ul class=\'dropdown-menu\'>");
-document.writeln("                        <li><a href=\'#\'>并发编程</a></li>");
-document.writeln("                        <li><a href=\'/notes/javanote/JVMBlog01.html\'>JVM</a></li>");
+document.writeln("                        <li><a href=\'../javanote/JVMBlog01.html\'>JVM</a></li>");
+document.writeln("                        <li><a href=\'../javanote/threadBlog01.html\'>并发编程</a></li>");
 document.writeln("                        <li class=\'divider\'></li>");
 document.writeln("                        <li><a href=\'#\'>MySQL调优</a></li>");
-document.writeln("                        <li><a href=\'#\'>网络协议</a></li>");
-document.writeln("                        <li><a href=\'#\'>Netty</a></li>");
 document.writeln("                        <li><a href=\'#\'>Tomcat</a></li>");
 document.writeln("                        <li class=\'divider\'></li>");
 document.writeln("                        <li><a href=\'#\'>设计模式</a></li>");
@@ -70,9 +68,8 @@ document.writeln("                        <span class=\'glyphicon glyphicon-book
 document.writeln("                        <b class=\'caret\'></b>");
 document.writeln("                    </a>");
 document.writeln("                    <ul class=\'dropdown-menu\'>");
-document.writeln("                        <li><a href=\'#\'>Spring</a></li>");
-document.writeln("                        <li><a href=\'#\'>MyBatis</a></li>");
-document.writeln("");
+document.writeln("                        <li><a href=\'#\'>Spring源码系列</a></li>");
+document.writeln("                        <li><a href=\'#\'>MyBatis源码系列</a></li>");
 document.writeln("                    </ul>");
 document.writeln("                </li>");
 document.writeln("                <li><a href=\'#\'><span class=\'glyphicon glyphicon-edit\'></span> 手写框架</a></li>");
