@@ -19,6 +19,7 @@
 
     <!-- Custom styles for this template -->
     <link href="../../assets/css/blog.css" rel="stylesheet">
+    <link href="../../assets/css/atelier-sulphurpool-dark.css" rel="stylesheet">
 
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]>
@@ -30,6 +31,9 @@
     <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <script>
+        hljs.initHighlightingOnLoad();
+    </script>
 </head>
 <body>
 <!-- reference head -->
@@ -109,14 +113,14 @@
                 <br>
                 <h3>主要参数</h3>
                 <hr>
-                <pre><code>
-                    public ThreadPoolExecutor(int corePoolSize,
-                        int maximumPoolSize,
-                        long keepAliveTime,
-                        TimeUnit unit,
-                        BlockingQueue &lt;Runnable&gt; workQueue,
-                        ThreadFactory threadFactory,
-                        RejectedExecutionHandler handler)
+                <pre class='hljs'><code>
+    <span class="hljs-keyword">public</span> ThreadPoolExecutor(<span class="hljs-keyword">int</span> corePoolSize,
+    <span class="hljs-keyword">int</span> maximumPoolSize,
+    <span class="hljs-keyword">long</span> keepAliveTime,
+    TimeUnit unit,
+    BlockingQueue &amp;lt;Runnable&amp;gt; workQueue,
+    ThreadFactory threadFactory,
+    RejectedExecutionHandler <span class="hljs-keyword">handler</span>)
                 </code></pre>
                 <ul>
                     <li><code>corePoolSize</code> : 核心线程数量，即规定线程池有几个线程(worker)在运行。</li>
@@ -136,7 +140,7 @@
                         </li>
                     </ul>
                     <br><li><code>maximumPoolSize</code> : 最大线程数量。当 <code>workQueue</code> 满了,不能添加任务的时候，这个参数才会生效。规定线程池最多只能有多少个线程(worker)在执行。</li>
-                    <br><li><code>keepAliveTime</code> : 线程池维护线程所允许的空闲时间。当线程池中的线程数量大于 <code>corePoolSize</code> 的时候，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了keepAliveTime。</li>
+                    <br><li><code>keepAliveTime</code> : 线程池维护线程所允许的空闲时间。当线程池中的线程数量大于 <code>corePoolSize</code> 的时候，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了<code>keepAliveTime</code>。</li>
                     <br><li><code>unit</code> : 生存时间对于的单位</li>
                     <br><li><code>workQueue</code> : 等待队列，当任务提交时，如果线程池中的线程数量大于等于corePoolSize的时候，把该任务封装成一个Worker对象放入等待队列。主要有以下几种处理方式：
                         <ul>
@@ -159,9 +163,197 @@
                             <br><li><code>DiscardPolicy</code>：直接丢弃任务；</li>
                         </ul>
                     </li>
-
                 </ul>
                 <br>
+                <div class="blog-callout blog-callout-danger">
+                    <h4>用户通过 <code>submit</code> 提交一个任务。线程池会执行如下流程:</h4>
+                    <ol>
+                        <li>
+                            判断当前运行的 <code>worker</code> 数量是否超过 <code>corePoolSize</code>,如果不超过 <code>corePoolSize</code>。就创建一个
+                            <code>worker</code> 直接执行该任务。—— 线程池最开始是没有 <code>worker</code> 在运行的 。
+                        </li>
+                        <li>
+                            如果正在运行的 <code>worker</code> 数量超过或者等于 <code>corePoolSize</code> ,那么就将该任务加入到 <code>workQueue</code> 队列中去。
+                        </li>
+                        <li>
+                            如果 <code>workQueue</code> 队列满了,也就是 <code>offer</code> 方法返回 <code>false</code> 的话，就检查当前运行的 <code>worker</code> 数量是否小于
+                            <code>maximumPoolSize</code> ,如果小于就创建一个 <code>worker</code> 直接执行该任务。
+                        </li>
+                        <li>
+                            如果当前运行的 <code>worker</code> 数量大于等于 <code>maximumPoolSize</code> ，那么就执行 <code>RejectedExecutionHandler</code> 来拒绝这个任务的提交。
+                        </li>
+                    </ol>
+                </div>
+                <div id="thread-1-7"><br>
+                    <h3>线程池常见的5种状态</h3><hr>
+                    <ul>
+                        <li><code>RUNNING</code> ：能接受新提交的任务，并且也能处理阻塞队列中的任务；</li><br>
+                        <li><code>SHUTDOWN</code> ：关闭状态，不再接受新提交的任务，但却可以继续处理阻塞队列中已保存的任务。
+                            在线程池处于 RUNNING 状态时，调用 shutdown()方法会使线程池进入到该状态。（finalize() 方法在执行过程中也会调用 shutdown()方法进入该状态）；</li><br>
+                        <li><code>STOP</code> ：不能接受新任务，也不处理队列中的任务，会中断正在处理任务的线程。
+                            在线程池处于 RUNNING 或 SHUTDOWN 状态时，调用 shutdownNow() 方法会使线程池进入到该状态；</li><br>
+                        <li><code>TIDYING</code> ：如果所有的任务都已终止了，workerCount (有效线程数) 为0，线程池进入该状态后会调用
+                            terminated() 方法进入TERMINATED 状态。</li><br>
+                        <li><code>TERMINATED</code> ：在terminated() 方法执行完后进入该状态，默认terminated()方法中什么也没有做。</li>
+                    </ul>
+                    <b>进入TERMINATED的条件如下：</b>
+                    <ul>
+                        <li>线程池不是RUNNING状态；</li>
+                        <li>线程池状态不是TIDYING状态或TERMINATED状态；</li>
+                        <li>如果线程池状态是SHUTDOWN并且workerQueue为空；</li>
+                        <li>workerCount为0；</li>
+                        <li>设置TIDYING状态成功。</li>
+                    </ul>
+                </div>
+                <div id="thread-1-8"><br>
+                    <h3>源码解析</h3><hr>
+                    <h4>ThreadPoolExecutor</h4>
+                    <ul>
+                        <li>ThreadPoolExecutor中的关键属性
+                            <pre class='hljs'><code>
+    <span class="hljs-comment">//这个属性是用来存放 当前运行的worker数量以及线程池状态的</span>
+    <span class="hljs-comment">//int是32位的，这里把int的高3位拿来充当线程池状态的标志位,后29位拿来充当当前运行worker的数量</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> AtomicInteger ctl = <span class="hljs-keyword">new</span> AtomicInteger(ctlOf(RUNNING, <span class="hljs-number">0</span>));
+    <span class="hljs-comment">//存放任务的阻塞队列</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> BlockingQueue&lt;Runnable&gt; workQueue;
+    <span class="hljs-comment">//worker的集合,用set来存放</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> HashSet&lt;Worker&gt; workers = <span class="hljs-keyword">new</span> HashSet&lt;Worker&gt;();
+    <span class="hljs-comment">//历史达到的worker数最大值</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> largestPoolSize;
+    <span class="hljs-comment">//当队列满了并且worker的数量达到maxSize的时候,执行具体的拒绝策略</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> RejectedExecutionHandler <span class="hljs-keyword">handler</span>;
+    <span class="hljs-comment">//超出coreSize的worker的生存时间</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> <span class="hljs-keyword">long</span> keepAliveTime;
+    <span class="hljs-comment">//常驻worker的数量</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> <span class="hljs-keyword">int</span> corePoolSize;
+    <span class="hljs-comment">//最大worker的数量,一般当workQueue满了才会用到这个参数</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> <span class="hljs-keyword">int</span> maximumPoolSize;
+                            </code></pre>
+                        </li>
+                    </ul><br>
+                    <h4>提交任务</h4>
+                    <ul>
+                        <li>提交任务时处理过程相关源码
+                            <pre class='hljs'><code>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">execute</span><span class="hljs-params">(Runnable command)</span> </span>{
+            <span class="hljs-keyword">if</span> (command == )
+                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> NullPointerException();
+            <span class="hljs-keyword">int</span> c = ctl.<span class="hljs-keyword">get</span>();
+            <span class="hljs-comment">//workerCountOf(c)会获取当前正在运行的worker数量</span>
+            <span class="hljs-keyword">if</span> (workerCountOf(c) &lt; corePoolSize) {
+                <span class="hljs-comment">//如果workerCount小于corePoolSize,就创建一个worker然后直接执行该任务</span>
+                <span class="hljs-keyword">if</span> (addWorker(command, <span class="hljs-keyword">true</span>))
+                    <span class="hljs-keyword">return</span>;
+                c = ctl.<span class="hljs-keyword">get</span>();
+            }
+            <span class="hljs-comment">//isRunning(c)是判断线程池是否在运行中,如果线程池被关闭了就不会再接受任务</span>
+            <span class="hljs-comment">//后面将任务加入到队列中</span>
+            <span class="hljs-keyword">if</span> (isRunning(c) &amp;&amp; workQueue.offer(command)) {
+                <span class="hljs-comment">//如果添加到队列成功了,会再检查一次线程池的状态</span>
+                <span class="hljs-keyword">int</span> recheck = ctl.<span class="hljs-keyword">get</span>();
+                <span class="hljs-comment">//如果线程池关闭了,就将刚才添加的任务从队列中移除</span>
+                <span class="hljs-keyword">if</span> (! isRunning(recheck) &amp;&amp; remove(command))
+                    <span class="hljs-comment">//执行拒绝策略</span>
+                    reject(command);
+                <span class="hljs-function"><span class="hljs-keyword">else</span> <span class="hljs-title">if</span> <span class="hljs-params">(workerCountOf(recheck)</span> </span>== <span class="hljs-number">0</span>)
+                    addWorker(, <span class="hljs-keyword">false</span>);
+            }
+            <span class="hljs-comment">//如果加入队列失败,就尝试直接创建worker来执行任务</span>
+            <span class="hljs-function"><span class="hljs-keyword">else</span> <span class="hljs-title">if</span> <span class="hljs-params">(!addWorker(command, <span class="hljs-keyword">false</span>)</span>)
+                <span class="hljs-comment">//如果创建worker失败,就执行拒绝策略</span>
+                <span class="hljs-title">reject</span><span class="hljs-params">(command)</span></span>;
+    }
+                            </code></pre>
+                        </li>
+                    </ul><br>
+                    <h4>addWorker</h4>
+                    <ul>
+                        <li>添加worker的方法addWorker源码
+                            <pre class='hljs'><code>
+    <span class="hljs-keyword">private</span> <span class="hljs-built_in">boolean</span> addWorker(Runnable firstTask, <span class="hljs-built_in">boolean</span> core) {
+            retry:
+            <span class="hljs-comment">//使用自旋+cas失败重试来保证线程竞争问题</span>
+            <span class="hljs-keyword">for</span> (;;) {
+                <span class="hljs-comment">//先获取线程池的状态</span>
+                <span class="hljs-built_in">int</span> c = ctl.<span class="hljs-built_in">get</span>();
+                <span class="hljs-built_in">int</span> rs = runStateOf(c);
+
+                <span class="hljs-comment">// 如果线程池是关闭的,或者workQueue队列非空,就直接返回false,不做任何处理</span>
+                <span class="hljs-keyword">if</span> (rs &gt;= SHUTDOWN &amp;&amp;
+                    ! (rs == SHUTDOWN &amp;&amp;
+                       firstTask ==  &amp;&amp;
+                       ! workQueue.isEmpty()))
+                    <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+
+                <span class="hljs-keyword">for</span> (;;) {
+                    <span class="hljs-built_in">int</span> wc = workerCountOf(c);
+                    <span class="hljs-comment">//根据入参core 来判断可以创建的worker数量是否达到上限,达到上限就拒绝创建worker</span>
+                    <span class="hljs-keyword">if</span> (wc &gt;= CAPACITY ||
+                        wc &gt;= (core ? corePoolSize : maximumPoolSize))
+                        <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+                    <span class="hljs-comment">//没有的话就尝试修改ctl添加workerCount的值。</span>
+                    <span class="hljs-comment">//这里用了cas操作,如果失败了下一个循环会继续重试,直到设置成功</span>
+                    <span class="hljs-keyword">if</span> (compareAndIncrementWorkerCount(c))
+                        <span class="hljs-comment">//如果设置成功了就跳出外层的那个for循环</span>
+                        <span class="hljs-keyword">break</span> retry;
+                    <span class="hljs-comment">//重读一次ctl,判断如果线程池的状态改变了,会再重新循环一次</span>
+                    c = ctl.<span class="hljs-built_in">get</span>();  <span class="hljs-comment">// Re-read ctl</span>
+                    <span class="hljs-keyword">if</span> (runStateOf(c) != rs)
+                        <span class="hljs-keyword">continue</span> retry;
+                }
+            }
+
+            <span class="hljs-built_in">boolean</span> workerStarted = <span class="hljs-keyword">false</span>;
+            <span class="hljs-built_in">boolean</span> workerAdded = <span class="hljs-keyword">false</span>;
+            Worker w = ;
+            <span class="hljs-keyword">try</span> {
+                <span class="hljs-keyword">final</span> ReentrantLock mainLock = <span class="hljs-keyword">this</span>.mainLock;
+                <span class="hljs-comment">//创建一个worker,将提交上来的任务直接交给worker</span>
+                w = <span class="hljs-keyword">new</span> Worker(firstTask);
+                <span class="hljs-keyword">final</span> Thread t = w.thread;
+                <span class="hljs-keyword">if</span> (t != ) {
+                    <span class="hljs-comment">//加锁,防止竞争</span>
+                    mainLock.lock();
+                    <span class="hljs-keyword">try</span> {
+                        <span class="hljs-built_in">int</span> c = ctl.<span class="hljs-built_in">get</span>();
+                        <span class="hljs-built_in">int</span> rs = runStateOf(c);
+                        <span class="hljs-comment">//还是判断线程池的状态</span>
+                        <span class="hljs-keyword">if</span> (rs &lt; SHUTDOWN ||
+                            (rs == SHUTDOWN &amp;&amp; firstTask == )) {
+                            <span class="hljs-comment">//如果worker的线程已经启动了,会抛出异常</span>
+                            <span class="hljs-keyword">if</span> (t.isAlive())
+                                  <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalThreadStateException();
+                            <span class="hljs-comment">//添加新建的worker到线程池中</span>
+                            workers.<span class="hljs-built_in">add</span>(w);
+                            <span class="hljs-built_in">int</span> s = workers.<span class="hljs-built_in">size</span>();
+                            <span class="hljs-comment">//更新历史worker数量的最大值</span>
+                            <span class="hljs-keyword">if</span> (s &gt; largestPoolSize)
+                                largestPoolSize = s;
+                            <span class="hljs-comment">//设置新增标志位</span>
+                            workerAdded = <span class="hljs-keyword">true</span>;
+                        }
+                    } <span class="hljs-keyword">finally</span> {
+                        mainLock.unlock();
+                    }
+                    <span class="hljs-comment">//如果worker是新增的,就启动该线程</span>
+                    <span class="hljs-keyword">if</span> (workerAdded) {
+                        t.start();
+                         <span class="hljs-comment">//成功启动了线程,设置对应的标志位</span>
+                        workerStarted = <span class="hljs-keyword">true</span>;
+                    }
+                }
+            } <span class="hljs-keyword">finally</span> {
+                <span class="hljs-comment">//如果启动失败了,会触发执行相应的方法</span>
+                <span class="hljs-keyword">if</span> (! workerStarted)
+                    addWorkerFailed(w);
+            }
+            <span class="hljs-keyword">return</span> workerStarted;
+    }
+                            </code></pre>
+                        </li>
+                    </ul>
+
+                </div>
 
 
             </div><!-- /.blog-post -->
@@ -197,5 +389,7 @@
     </div><!-- /.row -->
 
 </div><!-- /.container -->
+<!--Reference highlight-->
+<script src="../../assets/js/vendor/highlight.pack.js"></script>
 </body>
 </html>
