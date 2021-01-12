@@ -160,3 +160,7 @@ body {
     width: 700px;
   }
 }
+
+.cover-heading {
+  font-size: 75px;
+}
