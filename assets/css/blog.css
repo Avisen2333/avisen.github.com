@@ -2,3 +2,50 @@ body {
     padding-top: 50px;
     padding-bottom: 20px;
 }
+/* Common styles for all types */
+.blog-callout {
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+}
+.blog-callout h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+.blog-callout p:last-child {
+    margin-bottom: 0;
+}
+.blog-callout code {
+    border-radius: 3px;
+}
+
+.blog-callout code {
+    border-radius: 3px;
+}
+/* Variations */
+.blog-callout-danger {
+    border-left-color: #ce4844;
+}
+.blog-callout-danger h4 {
+    color: #ce4844;
+}
+.blog-callout-warning {
+    border-left-color: #c76d30;
+}
+.blog-callout-warning h4 {
+    color: #c76d30;
+}
+.blog-callout-success {
+    border-left-color: #176624;
+}
+.blog-callout-success h4 {
+    color: #176624;
+}
+.blog-callout-info {
+    border-left-color: #1b809e;
+}
+.blog-callout-info h4 {
+    color: #1b809e;
+}
