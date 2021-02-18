@@ -49,7 +49,7 @@ document.writeln("                        <span class=\'glyphicon glyphicon-book
 document.writeln("                        <b class=\'caret\'></b>");
 document.writeln("                    </a>");
 document.writeln("                    <ul class=\'dropdown-menu\'>");
-document.writeln("                        <li><a href=\'../javanote/JVMBlog01.html\'>JVM</a></li>");
+document.writeln("                        <li><a href=\'../javanote/jvmBlog01.html\'>JVM</a></li>");
 document.writeln("                        <li><a href=\'../javanote/threadBlog01.html\'>并发编程</a></li>");
 document.writeln("                        <li class=\'divider\'></li>");
 document.writeln("                        <li><a href=\'#\'>设计模式</a></li>");
